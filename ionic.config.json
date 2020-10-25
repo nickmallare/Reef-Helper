@@ -1,0 +1,7 @@
+{
+  "name": "reef-helper",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react"
+}
