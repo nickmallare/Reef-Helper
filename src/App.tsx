@@ -27,7 +27,7 @@ const App: React.FC = () => {
   const [calculatedAlk, setCalculatedAlk] = useState<number>();
   const [calculatedPhos, setCalculatedPhos] = useState<number>();
   const [alkError, setAlkError] = useState<string>();
-  const [phosphateError, setPhosphateError] = useState<boolean>();
+  const [phosphateError, setPhosphateError] = useState<string>();
   const [showHideAlk, setShowHideAlk] = useState(false);
   const [showHidePhos, setShowHidePhos] = useState(false);
 
@@ -40,7 +40,9 @@ const App: React.FC = () => {
       console.log("alk is null");
       return;
     }
-    const alk = 0.056 * +enteredAlk;
+    let alk: number = 0.056 * +enteredAlk;
+    //round to nearest hundreths place
+    alk = Math.round(alk * 100) / 100;
     setCalculatedAlk(alk);
 
     if (alk > 11.0) {
@@ -59,26 +61,27 @@ const App: React.FC = () => {
       console.log("phosphate is null")
       return;
     }
-    const phosphate = (3.066 * +enteredPhos) / 1000;
+    let phosphate:number = (3.066 * +enteredPhos) / 1000;
     setCalculatedPhos(phosphate);
+
+    if(phosphate > .3){
+      setPhosphateError('Your Phopshate is very high. Do a water change or run GFO');
+    }
+    else if(phosphate < .01){
+      setPhosphateError('Your Phopshate is very low and are in danger of starving your corals!');
+    }
   };
 
-  function calculateReadings() {
-    calculatePhosphate();
-    calculateAlk();
-    console.log("caluclateReadings");
-  }
-
-  const resetInputs = () => {
-    alkInputRef.current!.value = '';
-    phosphateInputRef.current!.value = '';
-  };
 
   return (
     <React.Fragment>
       <IonAlert isOpen={!!alkError}
         onDidDismiss={() => setAlkError('')}
         message={alkError}
+        buttons={['OK']}></IonAlert>
+        <IonAlert isOpen={!!phosphateError}
+        onDidDismiss={() => setPhosphateError('')}
+        message={phosphateError}
         buttons={['OK']}></IonAlert>
       <IonApp>
         <IonHeader>
@@ -90,46 +93,56 @@ const App: React.FC = () => {
           <IonGrid>
             <IonRow>
               <IonCol size-sm>
-              <IonCard>
-                <IonButton onClick={() => (setShowHideAlk(!showHideAlk))}>Alkalinty
-                <IonIcon icon={flaskOutline}/>
-                </IonButton>
-                {showHideAlk &&
-                <IonGrid>
-                  <IonRow>
-                    <IonCol>
-                      <IonInput placeholder="Enter Alkalinty in PPM" ref={alkInputRef}/>
-                    </IonCol>
-                    <IonCol>
-                      <IonButton className="cardButtons" onClick={calculateAlk}>
-                        Convert
-                        <IonIcon icon={calculatorOutline}/>
-                      </IonButton>
-                    </IonCol>
-                  </IonRow>
-                  <IonRow>
-                    <h2>{calculatedAlk} </h2>
-                  </IonRow>
-              </IonGrid>
-                }
-              </IonCard>
-              </IonCol>
-           
-              <IonCol  size-sm>
-              <IonCard>
-                  <IonButton onClick={() => (setShowHidePhos(!showHidePhos))}>Phosphate
-                  <IonIcon icon={calculatorOutline}/>
+                <IonCard>
+                  <IonButton onClick={() => (setShowHideAlk(!showHideAlk))}>Alkalinty
+                <IonIcon icon={flaskOutline} />
                   </IonButton>
-                {showHidePhos &&
-                <IonGrid>
-                  <IonRow>
-                    <IonInput placeholder="Enter Phosphate in PPB" ref={phosphateInputRef}></IonInput>
-                    <IonLabel></IonLabel>
-                  </IonRow>
-                </IonGrid>
-                }
-           
-              </IonCard>
+                  {showHideAlk &&
+                    <IonGrid>
+                      <IonRow>
+                        <IonCol>
+                          <IonInput placeholder="Enter Alkalinty in PPM" ref={alkInputRef} />
+                        </IonCol>
+                        <IonCol>
+                          <IonButton className="cardButtons" onClick={calculateAlk}>
+                            Convert
+                        <IonIcon icon={calculatorOutline} />
+                          </IonButton>
+                        </IonCol>
+                      </IonRow>
+                      <IonRow>
+                        <h2>{calculatedAlk} </h2>
+                      </IonRow>
+                    </IonGrid>
+                  }
+                </IonCard>
+              </IonCol>
+
+              <IonCol size-sm>
+                <IonCard>
+                  <IonButton onClick={() => (setShowHidePhos(!showHidePhos))}>Phosphate
+                  <IonIcon icon={calculatorOutline} />
+                  </IonButton>
+                  {showHidePhos &&
+                    <IonGrid>
+                    <IonRow>
+                      <IonCol>
+                        <IonInput placeholder="Enter Phosphate in PPB" ref={phosphateInputRef} />
+                      </IonCol>
+                      <IonCol>
+                        <IonButton className="cardButtons" onClick={calculatePhosphate}>
+                          Convert
+                      <IonIcon icon={calculatorOutline} />
+                        </IonButton>
+                      </IonCol>
+                    </IonRow>
+                    <IonRow>
+                      <h2>{calculatedPhos} </h2>
+                    </IonRow>
+                  </IonGrid>
+                  }
+
+                </IonCard>
               </IonCol>
             </IonRow>
 
